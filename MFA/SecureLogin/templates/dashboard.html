@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% set heading = "Security Dashboard" %}
+{% set subheading = "Overview of your account and MFA status" %}
+{% set title = "Dashboard • Secure MFA" %}
+
+{% block content %}
+<div class="mt-3">
+
+    <!-- Top summary card -->
+    <div class="border rounded-3 p-3 mb-3" style="background-color:#020617;">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h6 class="mb-1">Account secure</h6>
+                <p class="text-muted mb-1" style="font-size:0.9rem;">
+                    You are logged in as
+                    <strong>{{ session.get('email') }}</strong>.
+                </p>
+                <p class="text-muted mb-0" style="font-size:0.85rem;">
+                    MFA via email OTP is enabled for this session.
+                </p>
+            </div>
+            <div class="text-end">
+                <span class="badge rounded-pill bg-success">MFA Verified</span>
+                <div style="font-size:0.75rem;" class="text-muted mt-1">
+                    Last login just now
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="row g-3 mb-3">
+        <div class="col-6">
+            <div class="border rounded-3 p-3 h-100" style="background-color:#020617;">
+                <div class="text-muted" style="font-size:0.8rem;">Login protection</div>
+                <div class="fw-semibold mt-1">Multi-Factor Auth</div>
+                <p class="text-muted mb-0" style="font-size:0.8rem;">
+                    OTP required on every new session.
+                </p>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="border rounded-3 p-3 h-100" style="background-color:#020617;">
+                <div class="text-muted" style="font-size:0.8rem;">Session status</div>
+                <div class="fw-semibold mt-1">Active</div>
+                <p class="text-muted mb-0" style="font-size:0.8rem;">
+                    Close the browser or logout to end the session.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick actions & info -->
+    <div class="border rounded-3 p-3 mb-3" style="background-color:#020617;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0">Quick actions</h6>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/mfa" class="btn btn-outline-light btn-sm">
+                Re-verify with OTP
+            </a>
+            <a href="/logout" class="btn btn-outline-light btn-sm">
+                Logout from this session
+            </a>
+        </div>
+    </div>
+
+    <!-- Helpful tips -->
+    <div class="border rounded-3 p-3" style="background-color:#020617;">
+        <h6 class="mb-2">Security tips</h6>
+        <ul class="text-muted mb-0" style="font-size:0.8rem; padding-left:1.1rem;">
+            <li>Use a strong, unique password for this account.</li>
+            <li>Do not share your OTP codes with anyone.</li>
+            <li>Always log out on shared or public computers.</li>
+        </ul>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <small class="text-muted" style="font-size:0.75rem;">
+            Built with Flask • SQLAlchemy • Email OTP
+        </small>
+        <a href="/logout" class="btn btn-outline-light btn-sm">
+            Logout
+        </a>
+    </div>
+
+</div>
+{% endblock %}
