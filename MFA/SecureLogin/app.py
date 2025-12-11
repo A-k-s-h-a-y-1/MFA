@@ -36,7 +36,7 @@ app.config['MAIL_USE_SSL'] = False
 # <-- Inserted directly as requested (dummy password) -->
 app.config['MAIL_USERNAME'] = "akshaysaran00@gmail.com"
 # If your dummy had spaces and you accidentally pasted with spaces, remove them:
-app.config['MAIL_PASSWORD'] = "qmgn rjhu ntsr aizh".replace(" ", "")
+app.config['MAIL_PASSWORD'] = "abcd abcd abcd abcd".replace(" ", "")
 app.config['MAIL_DEFAULT_SENDER'] = "akshaysaran00@gmail.com"
 # -------------------------
 
@@ -271,3 +271,4 @@ if __name__ == '__main__':
 #   <button name="verify" type="submit">Verify</button>
 #   <button name="resend" type="submit">Resend OTP</button>
 # </form>
+
