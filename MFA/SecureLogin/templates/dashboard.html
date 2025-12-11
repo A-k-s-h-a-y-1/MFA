@@ -2,87 +2,205 @@
 {% set heading = "Security Dashboard" %}
 {% set subheading = "Overview of your account and MFA status" %}
 {% set title = "Dashboard • Secure MFA" %}
+{% set dashboard = true %}
 
 {% block content %}
-<div class="mt-3">
+<!-- Force viewport compatibility: base.html should already include viewport meta,
+     but if not, ensure base.html has: <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
 
-    <!-- Top summary card -->
-    <div class="border rounded-3 p-3 mb-3" style="background-color:#020617;">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <h6 class="mb-1">Account secure</h6>
-                <p class="text-muted mb-1" style="font-size:0.9rem;">
-                    You are logged in as
-                    <strong>{{ session.get('email') }}</strong>.
-                </p>
-                <p class="text-muted mb-0" style="font-size:0.85rem;">
-                    MFA via email OTP is enabled for this session.
-                </p>
-            </div>
-            <div class="text-end">
-                <span class="badge rounded-pill bg-success">MFA Verified</span>
-                <div style="font-size:0.75rem;" class="text-muted mt-1">
-                    Last login just now
-                </div>
-            </div>
+<style>
+  :root{
+    --bg-dark: #020617;
+    --glass-bg: rgba(255,255,255,0.03);
+    --glass-border: rgba(255,255,255,0.06);
+    --text-soft: rgba(230,238,248,0.95);
+    --muted: rgba(230,238,248,0.72);
+  }
+
+  /* Ensure page and body fill viewport */
+  html, body { height: 100%; min-height: 100%; }
+
+  /* Full width background wrapper so left/right gutters appear */
+  .dashboard-fluid {
+    min-height: 100vh;
+    background: linear-gradient(90deg, rgba(2,6,23,1) 0%, rgba(3,10,24,1) 100%);
+    padding: 2rem 0;
+  }
+
+  /* Center column and responsive limits */
+  .dashboard-center {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  /* Hero */
+  .dashboard-hero {
+    display:flex;
+    gap:1rem;
+    align-items:center;
+    color:var(--text-soft);
+    background-image:
+      linear-gradient(160deg, rgba(2,6,23,0.72), rgba(2,6,23,0.55)),
+      url('https://images.unsplash.com/photo-1555949963-aa79dcee981c?q=80&w=1920');
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    padding: clamp(1rem, 3.2vw, 2.25rem);
+    box-shadow: 0 10px 30px rgba(2,6,23,0.45), inset 0 1px 0 rgba(255,255,255,0.02);
+    overflow: hidden;
+  }
+
+  .glow { position:absolute; right:-90px; bottom:-40px; width:280px; height:280px; background:
+    radial-gradient(circle at 30% 30%, rgba(89,97,255,0.18), transparent 30%),
+    radial-gradient(circle at 70% 70%, rgba(0,210,255,0.08), transparent 30%);
+    filter: blur(28px); pointer-events:none; mix-blend-mode:screen; }
+
+  /* Typography scaling */
+  .hero-title { font-weight:700; margin:0; line-height:1.02; font-size:clamp(1.4rem, 3.4vw, 2.2rem); }
+  .hero-sub { color:var(--muted); margin-top:.4rem; font-size:clamp(.9rem,1.6vw,1.05rem); }
+
+  /* glass card style reused */
+  .glass { background:var(--glass-bg); border:1px solid var(--glass-border); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); color:var(--text-soft); border-radius:10px; }
+
+  /* responsive grid: main + sidebar */
+  .main-grid { display:grid; grid-template-columns: 1fr 320px; gap:1.2rem; margin-top:1rem; }
+  @media (max-width: 991px) { .main-grid { grid-template-columns: 1fr; } }
+
+  /* fade-up animation */
+  .fade-up { transform: translateY(14px); opacity: 0; transition: all 500ms cubic-bezier(.2,.9,.3,1); }
+  .fade-up.show { transform: translateY(0); opacity:1; }
+
+  /* action buttons */
+  .action-row { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.9rem; }
+  .action-row .btn { min-width:140px; }
+  @media (max-width:575px) { .action-row { flex-direction:column; } .action-row .btn { width:100%; min-width:0; } }
+
+  .meta-small { font-size:.82rem; color:var(--muted); }
+
+  /* make sure parent wrappers from base don't shrink center */
+  /* Specific override: force column to use full available width up to max */
+  .dashboard-center { width:100%; box-sizing:border-box; }
+
+  /* Safety overrides if base has restrictive selectors */
+  main, .main, .content, .app, #app, .container { max-width: 100% !important; width: 100% !important; }
+
+  /* Card hover lift on larger screens */
+  @media (min-width:768px) {
+    .lift:hover { transform: translateY(-6px); box-shadow:0 18px 30px rgba(2,6,23,0.55); transition: transform .22s ease; }
+  }
+
+  /* small screen tweaks */
+  @media (max-width:420px) {
+    .dashboard-center { padding:0 .6rem; }
+    .glass.card { padding:.8rem; }
+    .meta-small { font-size:.75rem; }
+  }
+</style>
+
+<div class="dashboard-fluid">
+  <div class="dashboard-center">
+
+    <!-- HERO (full-width centered column) -->
+    <div class="dashboard-hero glass position-relative fade-up" id="hero-card">
+      <div class="glow" aria-hidden="true"></div>
+
+      <!-- left -->
+      <div style="flex:1 1 60%; min-width:220px;">
+        <h1 class="hero-title">Welcome back, <span style="color:#a9c1ff">{{ current_user.email or session.get('email') }}</span></h1>
+        <p class="hero-sub">{{ subheading }}</p>
+
+        <div class="action-row">
+          <a href="/mfa" class="btn btn-light btn-ghost lift">Re-verify with OTP</a>
+          <a href="/logout" class="btn btn-outline-light lift">Logout</a>
         </div>
+      </div>
+
+      <!-- right -->
+      <div style="flex:0 0 220px; min-width:160px; text-align:right;">
+        <span class="badge rounded-pill bg-success" style="padding:.45rem .7rem; font-size:.9rem;">MFA Verified</span>
+        <div class="meta-small mt-2">Session active — last login just now</div>
+      </div>
     </div>
 
-    <!-- Stats row -->
-    <div class="row g-3 mb-3">
-        <div class="col-6">
-            <div class="border rounded-3 p-3 h-100" style="background-color:#020617;">
-                <div class="text-muted" style="font-size:0.8rem;">Login protection</div>
-                <div class="fw-semibold mt-1">Multi-Factor Auth</div>
-                <p class="text-muted mb-0" style="font-size:0.8rem;">
-                    OTP required on every new session.
-                </p>
-            </div>
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+      <!-- left column -->
+      <div>
+        <div class="glass card fade-up" id="card-1" style="padding:1rem; margin-top:1rem;">
+          <h6 class="mb-1">Account secure</h6>
+          <p class="meta-small mb-2">You are logged in as <strong>{{ current_user.email or session.get('email') }}</strong></p>
+          <p class="meta-small mb-0">MFA via email OTP is enabled to protect your account.</p>
         </div>
-        <div class="col-6">
-            <div class="border rounded-3 p-3 h-100" style="background-color:#020617;">
-                <div class="text-muted" style="font-size:0.8rem;">Session status</div>
-                <div class="fw-semibold mt-1">Active</div>
-                <p class="text-muted mb-0" style="font-size:0.8rem;">
-                    Close the browser or logout to end the session.
-                </p>
-            </div>
-        </div>
-    </div>
 
-    <!-- Quick actions & info -->
-    <div class="border rounded-3 p-3 mb-3" style="background-color:#020617;">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="mb-0">Quick actions</h6>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="/mfa" class="btn btn-outline-light btn-sm">
-                Re-verify with OTP
-            </a>
-            <a href="/logout" class="btn btn-outline-light btn-sm">
-                Logout from this session
-            </a>
-        </div>
-    </div>
+        <div class="row g-3" style="margin-top:1rem;">
+          <div class="col-12 col-md-6" style="padding:0;">
+            <div class="glass card fade-up lift" id="card-2" style="padding:1rem; margin-bottom:1rem;">
+              <div class="text-muted" style="font-size:.85rem;">Login protection</div>
+              <div class="fw-semibold mt-1">Multi-Factor Auth</div>
+              <p class="meta-small mb-0">OTP required on every new session.</p>
+            </div>
+          </div>
 
-    <!-- Helpful tips -->
-    <div class="border rounded-3 p-3" style="background-color:#020617;">
-        <h6 class="mb-2">Security tips</h6>
-        <ul class="text-muted mb-0" style="font-size:0.8rem; padding-left:1.1rem;">
+          <div class="col-12 col-md-6" style="padding:0;">
+            <div class="glass card fade-up lift" id="card-3" style="padding:1rem; margin-bottom:1rem;">
+              <div class="text-muted" style="font-size:.85rem;">Session status</div>
+              <div class="fw-semibold mt-1">Active</div>
+              <p class="meta-small mb-0">Close the browser or logout to end the session.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass card fade-up" id="card-4" style="padding:1rem; margin-top:1rem;">
+          <h6 class="mb-2">Security tips</h6>
+          <ul class="text-muted mb-0" style="font-size:0.95rem;">
             <li>Use a strong, unique password for this account.</li>
             <li>Do not share your OTP codes with anyone.</li>
             <li>Always log out on shared or public computers.</li>
-        </ul>
+          </ul>
+        </div>
+      </div>
+
+      <!-- right column (sidebar) -->
+      <aside>
+        <div class="glass card fade-up lift" id="card-5" style="padding:1rem;">
+          <h6 class="mb-2">Quick actions</h6>
+          <div class="d-grid gap-2">
+            <a href="/mfa" class="btn btn-light btn-sm">Re-verify with OTP</a>
+            <a href="/logout" class="btn btn-outline-light btn-sm">Logout</a>
+          </div>
+          <hr class="my-3" style="border-color: rgba(255,255,255,0.04);">
+          <div class="meta-small">Built with Flask • SQLAlchemy • Email OTP</div>
+        </div>
+
+        <div class="glass card fade-up" id="card-6" style="padding:1rem; margin-top:1rem;">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="text-muted" style="font-size:.85rem;">MFA</div>
+              <div class="fw-semibold">Email OTP</div>
+            </div>
+            <div class="text-end">
+              <div class="badge bg-success">Active</div>
+              <div class="meta-small mt-1">Expires soon</div>
+            </div>
+          </div>
+        </div>
+      </aside>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mt-3">
-        <small class="text-muted" style="font-size:0.75rem;">
-            Built with Flask • SQLAlchemy • Email OTP
-        </small>
-        <a href="/logout" class="btn btn-outline-light btn-sm">
-            Logout
-        </a>
+    <div class="text-center mt-4 meta-small">
+      <small>Tip: Keep this tab open to avoid OTP expiration.</small>
     </div>
-
+  </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const cards = document.querySelectorAll('.fade-up');
+    cards.forEach((el, i) => {
+      setTimeout(() => el.classList.add('show'), 100 * i);
+    });
+  });
+</script>
 {% endblock %}
+
